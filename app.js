@@ -26,7 +26,10 @@ function saveCols(){ localStorage.setItem('cjsi_cols', JSON.stringify(userCols))
 function allCols(){ return [...BUILTIN, ...userCols]; }
 
 // ─── DARK MODE ───────────────────────────────────────────────────────
-function applyDark(){ document.documentElement.setAttribute('data-dark', darkMode?'1':''); }
+function applyDark(){
+  if(darkMode) document.documentElement.setAttribute('data-dark','1');
+  else document.documentElement.removeAttribute('data-dark');
+}
 function toggleDark(){ darkMode=!darkMode; localStorage.setItem('cjsi_dark',darkMode?'1':''); applyDark(); }
 applyDark();
 
