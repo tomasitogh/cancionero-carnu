@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Cancionero">
+  <meta name="theme-color" content="#00838f">
+  <title>Cancionero</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div style="flex:1">
+      <h1 id="hdr-title">CANCIONERO</h1>
+      <p id="hdr-sub">PASCUA JOVEN SAN ISIDRO</p>
+    </div>
+    <button class="hbtn" onclick="toggleDark()" title="Modo oscuro">&#9790;</button>
+    <button class="hbtn" id="hdr-back" onclick="goBack()" hidden>&#8592; Volver</button>
+  </div>
+  <div id="main"></div>
+</div>
+<script src="songs_data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
