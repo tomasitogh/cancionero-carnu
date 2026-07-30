@@ -75,9 +75,8 @@ function curKey(){ const i=nIdx(S.song.k); return i<0?S.song.k:NOTES[((i+S.delta
 // ─── NAVIGATION ──────────────────────────────────────────────────────
 function goBack(){
   if(S.addToSl){ S.addToSl=null; renderSlEdit(); return; }
-  if(S.view==='song'){ S.sl?renderSlPlay():renderCol(); return; }
+  if(S.view==='song'){ S.sl?renderSlEdit():renderCol(); return; }
   if(S.view==='sl-edit'){ renderCol(); return; }
-  if(S.view==='sl-play'){ renderSlEdit(); return; }
   if(S.view==='add-col'){ renderHome(); return; }
   renderHome();
 }
@@ -286,14 +285,18 @@ function renderSongView(){
   const s=S.song; const inSl=!!S.sl;
   updateHdr(s.n+'. '+s.t,'',true);
 
+  // navPos/navTotal: posición actual y total, ya sea dentro de la setlist o de toda la colección
+  const navTotal = inSl ? S.sl.songs.length : S.col.songs.length;
+  const navPos = inSl ? S.slPos : S.songIdx;
+
   const favBtn = `<button class="sv-navbtn" id="favbtn-song" onclick="toggleFavInSong()" title="Favorito">${isFav(S.col.id,s.n)?'★':'☆'}</button>`;
   const shareBtn = `<button class="sv-navbtn" onclick="shareSong()" title="Compartir">🔗</button>`;
-  const navHtml = favBtn + shareBtn + (inSl ? `
+  const navHtml = favBtn + shareBtn + `
     <div class="sv-nav" style="margin-left:auto">
-      ${S.slPos>0?`<button class="sv-navbtn" onclick="slNav(-1)">&#8592;</button>`:''}
-      <span class="sv-counter">${S.slPos+1} / ${S.sl.songs.length}</span>
-      ${S.slPos<S.sl.songs.length-1?`<button class="sv-navbtn" onclick="slNav(1)">&#8594;</button>`:''}
-    </div>` : '');
+      ${navPos>0?`<button class="sv-navbtn" onclick="navSong(-1)">&#8592;</button>`:''}
+      <span class="sv-counter">${navPos+1} / ${navTotal}</span>
+      ${navPos<navTotal-1?`<button class="sv-navbtn" onclick="navSong(1)">&#8594;</button>`:''}
+    </div>`;
 
   setMain(`
     <div class="sv-hdr">${navHtml}</div>
@@ -326,31 +329,51 @@ function renderSongView(){
           <button class="ascroll-btn" id="scbtn" onclick="toggleScroll()">&#9654;</button>
         </div>
         <div id="sb"></div>
-        ${inSl?`<p class="swipe-hint">← deslizá para navegar →</p>`:''}
+        <div class="row-btns mt16">
+          ${navPos>0?`<button class="btn btn-outline" style="flex:1" onclick="navSong(-1)">&#8592; Anterior</button>`:''}
+          ${navPos<navTotal-1?`<button class="btn btn-primary" style="flex:1" onclick="navSong(1)">Siguiente &#8594;</button>`:''}
+        </div>
+        ${navTotal>1?`<p class="swipe-hint">← deslizá para navegar →</p>`:''}
       </div>
       <div class="safe-b"></div>
     </div>`);
 
   buildKbar(); renderBody();
-  // Swipe for setlist nav
-  if(inSl){
-    const main=document.getElementById('main');
-    main.addEventListener('touchstart',e=>{S.touchX=e.touches[0].clientX;},{passive:true});
-    main.addEventListener('touchend',e=>{
-      const dx=e.changedTouches[0].clientX-S.touchX;
-      if(Math.abs(dx)>60){ if(dx<0)slNav(1); else slNav(-1); }
-    },{passive:true});
-  }
+  bindSwipeOnce();
 }
 function toggleFavInSong(){
   toggleFav(S.col.id, S.song.n);
   const btn=document.getElementById('favbtn-song');
   if(btn) btn.textContent = isFav(S.col.id,S.song.n) ? '★' : '☆';
 }
+// Navega a la canción siguiente/anterior: dentro de la setlist si hay una activa,
+// o dentro de toda la colección si se está navegando suelto (sin setlist).
+function navSong(d){
+  if(S.sl){ slNav(d); return; }
+  const ni=S.songIdx+d;
+  if(ni<0||ni>=S.col.songs.length)return;
+  openSong(ni);
+}
 function slNav(d){
   const np=S.slPos+d;
   if(np<0||np>=S.sl.songs.length)return;
   S.slPos=np; openSong(S.sl.songs[np]);
+}
+// El listener de swipe se ata UNA SOLA VEZ al contenedor #main (que nunca se
+// reemplaza, solo se le cambia el innerHTML). Antes se ataba de nuevo en cada
+// renderSongView() y, como nunca se sacaban los anteriores, se iban acumulando:
+// después de ver varias canciones un swipe disparaba navSong(1) varias veces
+// seguidas y saltaba de golpe varias canciones en vez de solo la siguiente.
+let swipeBound=false;
+function bindSwipeOnce(){
+  if(swipeBound)return; swipeBound=true;
+  const main=document.getElementById('main');
+  main.addEventListener('touchstart',e=>{S.touchX=e.touches[0].clientX;},{passive:true});
+  main.addEventListener('touchend',e=>{
+    if(S.view!=='song')return;
+    const dx=e.changedTouches[0].clientX-S.touchX;
+    if(Math.abs(dx)>60){ if(dx<0)navSong(1); else navSong(-1); }
+  },{passive:true});
 }
 function shiftKey(d){
   S.delta=((S.delta+d)%12+12)%12;
