@@ -11,7 +11,8 @@ let S = {
   sl:null, slPos:0,
   delta:0, showChords:true, fontSize:14,
   addToSl:null,  // setlist we're adding songs to
-  scrollTimer:null, touchX:0
+  scrollTimer:null, touchX:0,
+  favOnly:false
 };
 
 // ─── PERSISTENCE ─────────────────────────────────────────────────────
@@ -24,6 +25,16 @@ function savePls(colId,pls){ localStorage.setItem('cjsi_pls_'+colId, JSON.string
 function saveHist(){ localStorage.setItem('cjsi_hist', JSON.stringify(hist)); }
 function saveCols(){ localStorage.setItem('cjsi_cols', JSON.stringify(userCols)); }
 function allCols(){ return [...BUILTIN, ...userCols]; }
+
+// ─── FAVORITOS ───────────────────────────────────────────────────────
+let favs = JSON.parse(localStorage.getItem('cjsi_favs')||'{}');
+function favKey(colId,n){ return colId+'-'+n; }
+function isFav(colId,n){ return !!favs[favKey(colId,n)]; }
+function toggleFav(colId,n){
+  const k=favKey(colId,n);
+  if(favs[k]) delete favs[k]; else favs[k]=true;
+  localStorage.setItem('cjsi_favs', JSON.stringify(favs));
+}
 
 // ─── DARK MODE ───────────────────────────────────────────────────────
 function applyDark(){
@@ -102,7 +113,7 @@ function renderHome(){
 function openCol(id){
   const col = allCols().find(c=>c.id===id);
   if(!col)return;
-  S.col=col; S.colTab='songs'; S.addToSl=null;
+  S.col=col; S.colTab='songs'; S.addToSl=null; S.favOnly=false;
   renderCol();
 }
 
@@ -140,16 +151,25 @@ function renderColTab(){
 function buildSongsTab(){
   if(!S.col.songs.length) return `<div class="empty">Sin canciones.<br><br>
     <button class="btn btn-outline btn-sm" onclick="renderAddSongForm()">+ Agregar canción</button></div>`;
-  let rows = S.col.songs.map((s,i)=>`
+  const visible = S.favOnly ? S.col.songs.filter(s=>isFav(S.col.id,s.n)) : S.col.songs;
+  let rows = visible.length ? visible.map(s=>{
+    const i = S.col.songs.indexOf(s);
+    const fav = isFav(S.col.id,s.n);
+    return `
     <div class="srow" onclick="openSong(${i})">
       <span class="rnum">${s.n}</span>
       <span class="rname">${esc(s.t)}${s.a?'<br><span style="font-size:11px;color:var(--text2)">'+esc(s.a)+'</span>':''}</span>
       <span class="rkey">${s.k}${s.c?' c.'+s.c:''}</span>
-    </div>`).join('');
+      <span class="favbtn ${fav?'on':''}" onclick="event.stopPropagation();toggleFav('${S.col.id}',${s.n});renderColTab()">${fav?'★':'☆'}</span>
+    </div>`;
+  }).join('') : `<div class="empty">No tenés favoritos todavía.<br>Tocá la estrella de una canción para agregarla.</div>`;
   const addBtn = !S.col.readonly?`<button class="btn btn-dashed mt12" onclick="renderAddSongForm()">+ Agregar canción</button>`:'';
   return `<input class="srch" placeholder="Buscar…" oninput="filterSongs(this.value)">
+    <button class="pill ${S.favOnly?'on':''}" style="margin-bottom:10px" onclick="toggleFavFilter()">★ Solo favoritos</button>
     <div id="songs-list">${rows}</div>${addBtn}<div class="safe-b"></div>`;
 }
+
+function toggleFavFilter(){ S.favOnly=!S.favOnly; renderColTab(); }
 
 function filterSongs(q){
   const el=document.getElementById('songs-list'); if(!el)return;
@@ -266,8 +286,9 @@ function renderSongView(){
   const s=S.song; const inSl=!!S.sl;
   updateHdr(s.n+'. '+s.t,'',true);
 
+  const favBtn = `<button class="sv-navbtn" id="favbtn-song" onclick="toggleFavInSong()" title="Favorito">${isFav(S.col.id,s.n)?'★':'☆'}</button>`;
   const shareBtn = `<button class="sv-navbtn" onclick="shareSong()" title="Compartir">🔗</button>`;
-  const navHtml = shareBtn + (inSl ? `
+  const navHtml = favBtn + shareBtn + (inSl ? `
     <div class="sv-nav" style="margin-left:auto">
       ${S.slPos>0?`<button class="sv-navbtn" onclick="slNav(-1)">&#8592;</button>`:''}
       <span class="sv-counter">${S.slPos+1} / ${S.sl.songs.length}</span>
@@ -320,6 +341,11 @@ function renderSongView(){
       if(Math.abs(dx)>60){ if(dx<0)slNav(1); else slNav(-1); }
     },{passive:true});
   }
+}
+function toggleFavInSong(){
+  toggleFav(S.col.id, S.song.n);
+  const btn=document.getElementById('favbtn-song');
+  if(btn) btn.textContent = isFav(S.col.id,S.song.n) ? '★' : '☆';
 }
 function slNav(d){
   const np=S.slPos+d;
