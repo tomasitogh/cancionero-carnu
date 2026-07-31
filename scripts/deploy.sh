@@ -38,6 +38,7 @@ cp "$SRC/style.css"     "$REPO_DIR/"
 cp "$SRC/app.js"        "$REPO_DIR/"
 cp "$SRC/songs_data.js" "$REPO_DIR/"
 cp "$SRC/general_songs_data.js" "$REPO_DIR/"
+cp "$SRC/beatles_songs_data.js" "$REPO_DIR/"
 cp "$SRC/README.md"     "$REPO_DIR/"
 mkdir -p "$REPO_DIR/scripts"
 cp "$SRC/scripts/"*.py "$REPO_DIR/scripts/" 2>/dev/null || true

@@ -7,6 +7,10 @@ const BUILTIN = [
   {
     id:'generales', name:'Generales', sub:'',
     emoji:'🎵', color:'#8e24aa', readonly:true, songs:GENERAL_SONGS
+  },
+  {
+    id:'beatles', name:'The Beatles', sub:'Álbum 1 (en orden) + clásicos',
+    emoji:'🎸', color:'#c62828', readonly:true, songs:BEATLES_SONGS
   }
 ];
 
