@@ -1,8 +1,14 @@
 // ─── BUILT-IN COLLECTIONS ────────────────────────────────────────────
-const BUILTIN = [{
-  id:'iglesia', name:'Iglesia', sub:'Pascua Joven San Isidro',
-  emoji:'⛪', color:'#00838f', readonly:true, songs:SONGS
-}];
+const BUILTIN = [
+  {
+    id:'iglesia', name:'Iglesia', sub:'Pascua Joven San Isidro',
+    emoji:'⛪', color:'#00838f', readonly:true, songs:SONGS
+  },
+  {
+    id:'generales', name:'Generales', sub:'',
+    emoji:'🎵', color:'#8e24aa', readonly:true, songs:GENERAL_SONGS
+  }
+];
 
 // ─── STATE ───────────────────────────────────────────────────────────
 let S = {
