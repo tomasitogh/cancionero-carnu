@@ -111,11 +111,11 @@ button,input{font-family:inherit;color:inherit;touch-action:manipulation}
 .ascroll-btn{background:var(--cbt);border:1px solid var(--cbt-b);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;min-height:36px}
 .ascroll-btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 /* SONG BODY */
-#sb{font-family:"Courier New",Courier,monospace;font-size:14px;line-height:1.65;white-space:pre;padding:4px 0}
+#sb{font-family:"Courier New",Courier,monospace;font-size:14px;line-height:1.28;white-space:pre;padding:4px 0}
 .cl{color:var(--chord);font-weight:700;display:block}
 .ll{display:block}
-.sl2{font-family:-apple-system,sans-serif;font-size:11px;font-weight:700;color:var(--text2);display:block;margin:6px 0 2px;white-space:normal}
-.gl{display:block;height:8px}
+.sl2{font-family:-apple-system,sans-serif;font-size:11px;font-weight:700;color:var(--text2);display:block;margin:5px 0 1px;white-space:normal}
+.gl{display:block;height:5px}
 /* MISC */
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .mb8{margin-bottom:8px}.mb12{margin-bottom:12px}
